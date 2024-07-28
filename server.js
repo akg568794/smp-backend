@@ -16,10 +16,20 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://smp-frontend-alpha.vercel.app']
 }));
 
+let currentStatus = {
+  action: 'pause',
+  currentTime: 0
+};
+
 io.on('connection', (socket) => {
   console.log('a user connected');
+  
+  // Send current status to newly connected client
+  socket.emit('sync', currentStatus);
 
   socket.on('sync', (data) => {
+    console.log('sync event received', data);
+    currentStatus = data;
     socket.broadcast.emit('sync', data);
   });
 
@@ -27,10 +37,6 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 });
-
-app.get("/",(req,res)=>{
-  res.send("Backend is Running!");
-})
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

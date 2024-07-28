@@ -7,38 +7,28 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://smp-frontend-alpha.vercel.app'],
-    methods: ['GET', 'POST']
+    origin: 'https://smp-frontend-alpha.vercel.app', // Replace with your frontend domain
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true
   }
 });
 
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://smp-frontend-alpha.vercel.app']
-}));
-
-let currentStatus = {
-  action: 'pause',
-  currentTime: 0
-};
+app.use(cors());
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
-  
-  // Send current status to newly connected client
-  socket.emit('sync', currentStatus);
+  console.log('New client connected');
 
   socket.on('sync', (data) => {
     console.log('sync event received', data);
-    currentStatus = data;
-    socket.broadcast.emit('sync', data);
+    io.emit('sync', data); // Broadcast to all clients
   });
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    console.log('Client disconnected');
   });
 });
 
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(3001, () => {
+  console.log('Listening on port 3001');
 });

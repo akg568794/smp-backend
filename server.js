@@ -17,12 +17,11 @@ app.use(cors({
   origin: process.env.FRONTEND_URL
 }));
 
-app.use(express.static('public'));
-
 io.on('connection', (socket) => {
   console.log('a user connected');
 
   socket.on('sync', (data) => {
+    console.log('sync event received:', data);
     socket.broadcast.emit('sync', data);
   });
 
